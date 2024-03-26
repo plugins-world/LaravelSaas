@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Models;
+
+use Stancl\Tenancy\Database\Models\Tenant as BaseTenant;
+use Stancl\Tenancy\Contracts\TenantWithDatabase;
+use Stancl\Tenancy\Database\Concerns\HasDatabase;
+use Stancl\Tenancy\Database\Concerns\HasDomains;
+
+class Tenant extends BaseTenant implements TenantWithDatabase
+{
+    use HasDatabase, HasDomains;
+
+    protected $guarded = [];
+
+    protected $hidden = [
+        'tenancy_db_name',
+    ];
+
+    public static function getCustomColumns(): array
+    {
+        return [
+            'id',
+            'created_at',
+            'updated_at',
+        ];
+    }
+
+    public static function createStorageLink($tenant)
+    {
+        $target = base_path(sprintf("storage/tenants/%s%s/app/public", 
+        config('tenancy.filesystem.suffix_base'),
+        $tenant->id));
+        $link = str_replace('%tenant_id%', $tenant->id, config('tenancy.filesystem.url_override.public', 'public-%tenant_id%'));
+
+        chdir(public_path());
+        \Illuminate\Support\Facades\File::ensureDirectoryExists($target);
+        \Illuminate\Support\Facades\File::ensureDirectoryExists(dirname($link));
+        \Illuminate\Support\Facades\File::link($target, $link);
+    }
+
+    public static function removeStorageLink($tenant)
+    {
+        $target = base_path(sprintf("storage/tenants/%s%s/app/public", 
+            config('tenancy.filesystem.suffix_base'),
+            $tenant->id));
+        $link = str_replace('%tenant_id%', $tenant->id, config('tenancy.filesystem.url_override.public', 'public-%tenant_id%'));
+
+        chdir(public_path());
+        \Illuminate\Support\Facades\File::delete($link);
+        \Illuminate\Support\Facades\File::deleteDirectory(dirname(dirname($target)));
+    }
+}
