@@ -1,0 +1,31 @@
+{
+    "name": "plugins-world/laravel-saas",
+    "description": "Tenant plugin made by fresns",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "mouyong",
+            "email": "my24251325@gmail.com",
+            "homepage": "https://github.com/mouyong",
+            "role": "Creator & Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Plugins\\LaravelSaas\\": "app",
+            "Plugins\\LaravelSaas\\Database\\Factories\\": "database/factories/",
+            "Plugins\\LaravelSaas\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Plugins\\LaravelSaas\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": ">= 8.0",
+        "mouyong/laravel-config": "dev-master",
+        "fresns/cmd-word-manager": "^1.0",
+        "stancl/tenancy": "^3.7"
+    }
+}
