@@ -1,0 +1,44 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+use App\Models\User;
+use App\Models\Tenant;
+use Inertia\Inertia;
+
+class AuthenticateTenantSession
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        if (auth()->check()) {
+            /** @var \App\Models\User */
+            $user = auth()->user();
+
+            $tenantModel = Tenant::where('data->name', auth()->user()->name)->first();
+            $domain = $tenantModel?->domains()->value('domain');
+
+            // TODO: 租户信息验证
+
+
+            // 租户自动登录
+            if ($tenantModel && ! tenant()) {
+                $data = encrypt(['user' => $user->toArray()]);
+                $tenantUrl = "http://{$domain}/login?encryptData=".$data;
+
+                auth()->logout($user);
+
+                return Inertia::location($tenantUrl);
+            }
+        }
+
+        return $next($request);
+    }
+}
